@@ -32,6 +32,37 @@ func Hello(name string) (string, error) {
     return message, nil
 }
 
+// Changing the Hello function's parameter from a single name to a set of names
+// would change the function signature. If you had already published the
+// greetings module and users had already written code calling Hello, that
+// change would break their programs. In this situation, a better choice is to
+// give new functionality a new name.
+
+// Hellos returns a map that associates each of the named people with a greeting
+// message.
+// The parameter is a slice of names rather than a single name. Also, the type
+// of its return values is a map so you can return names mapped to greeting
+// messages.
+//
+func Hellos(names []string) (map[string]string, error) {
+    // Initiliaze map to associate names with messages.
+    messages := make(map[string]string)
+	// Loop through the received slice of names, calling the Hello function to
+	// get a message for each name.
+	// In the "for" loop, "range" returns two values: the index of the current
+	// item in the loop and a copy of the item's value. You don't need the
+	// index, so you use the Go blank identifier (an underscore) to ignore it.
+    for _, name := range names {
+        message, err := Hello(name)
+        if err != nil {
+            return nil, err
+        }
+        // In the map, associate the retrieved message with the name.
+        messages[name] = message
+    }
+    return messages, nil
+}
+
 // init sets initial values for variables used in the function.
 // Go executes init functions automatically at program startup, after global
 // variables have been initialized.
