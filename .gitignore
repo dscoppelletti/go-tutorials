@@ -1,0 +1,11 @@
+# Ignored files
+
+# Visual Code
+*.code-workspace
+
+# Windows
+Thumbs.db
+
+# Mac
+.DS_Store
+
