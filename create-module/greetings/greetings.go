@@ -27,7 +27,12 @@ func Hello(name string) (string, error) {
 	// variable's type).
 	// Create a message using a random format.
 	// Sprintf substitutes the name parameter's value for the %v format verb.
-    message := fmt.Sprintf(randomFormat(), name)
+	message := fmt.Sprintf(randomFormat(), name)
+
+	// Comment the previous line and uncomment the following lines to break the
+	// greetings.Hello function to view a failing test.
+	// message := fmt.Sprintf(randomFormat())
+
 	// The second returned value "nil" means no error.
     return message, nil
 }
