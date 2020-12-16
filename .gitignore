@@ -1,5 +1,8 @@
 # Ignored files
 
+# Executables
+create-module/hello/hello
+
 # Visual Code
 *.code-workspace
 
