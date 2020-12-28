@@ -1,5 +1,5 @@
-Tutorial: Create a Go module
-============================
+Create a Go module
+==================
 
 Content: http://golang.org/doc/tutorial/create-module
 

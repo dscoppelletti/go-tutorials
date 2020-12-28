@@ -1,5 +1,5 @@
-Tutorial: Get started with Go
-=============================
+Get started with Go
+===================
 
 Content: http://golang.org/doc/tutorial/getting-started
 
@@ -7,4 +7,4 @@ Content: http://golang.org/doc/tutorial/getting-started
 
 * [Packages](http://golang.org/pkg)
 * [Command go](http://golang.org/cmd/go/)
-* [Disconver Packages](http://pkg.go.dev)
+* [Discover Packages](http://pkg.go.dev)
