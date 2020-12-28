@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"html/template"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -49,6 +49,18 @@ func loadPage(title string) (*Page, error) {
     return &Page{Title: title, Body: body}, nil
 }
 
+func renderTemplate(w http.ResponseWriter, tmpl string, p *Page) {
+	// The html/template package is part of the Go standard library: we can use
+	// html/template to keep the HTML in a separate file, allowing us to change
+	// the layout of our edit page without modifying the underlying Go code.
+	// The function ParseFiles reads the contents of edit.html and return a
+	// *Template.
+	t, _ := template.ParseFiles(tmpl + ".html")
+	// The method Execute executes the template, writing the generated HTML to
+	// the ResponseWriter
+    t.Execute(w, p)
+}
+
 // The function viewHandler allow users to view a wiki page; it will handle URLs
 // prefixed with "/view/".
 func viewHandler(w http.ResponseWriter, r *http.Request) {
@@ -59,12 +71,22 @@ func viewHandler(w http.ResponseWriter, r *http.Request) {
 	title := r.URL.Path[len("/view/"):]
 	// Load the page data.
 	p, _ := loadPage(title)
-	// Format the page with a string of simple HTML, and writes it the
-	// ResponseWriter.
-    fmt.Fprintf(w, "<h1>%s</h1><div>%s</div>", p.Title, p.Body)
+	renderTemplate(w, "view", p)
+}
+
+// The function editHandler loads the page (or, if it doesn't exist, create an
+// empty Page struct), and displays an HTML form.
+func editHandler(w http.ResponseWriter, r *http.Request) {
+    title := r.URL.Path[len("/edit/"):]
+    p, err := loadPage(title)
+    if err != nil {
+        p = &Page{Title: title}
+	}
+	renderTemplate(w, "edit", p)
 }
 
 func main() {
-    http.HandleFunc("/view/", viewHandler)
+	http.HandleFunc("/view/", viewHandler)
+	http.HandleFunc("/edit/", editHandler)
     log.Fatal(http.ListenAndServe(":8080", nil))
 }
