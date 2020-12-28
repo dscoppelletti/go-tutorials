@@ -2,6 +2,8 @@
 
 # Executables
 create-module/hello/hello
+gowiki/TestPage.txt
+gowiki/wiki
 
 # Visual Code
 *.code-workspace
