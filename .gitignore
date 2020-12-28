@@ -3,9 +3,10 @@
 # Executables
 create-module/hello/hello
 gowiki/sample
-gowiki/test.txt
-gowiki/TestPage.txt
 gowiki/wiki
+
+# Text files
+gowiki/*.txt
 
 # Visual Code
 *.code-workspace
