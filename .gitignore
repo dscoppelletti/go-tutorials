@@ -2,6 +2,8 @@
 
 # Executables
 create-module/hello/hello
+gowiki/sample
+gowiki/test.txt
 gowiki/TestPage.txt
 gowiki/wiki
 
@@ -13,4 +15,3 @@ Thumbs.db
 
 # Mac
 .DS_Store
-

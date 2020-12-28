@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
+	"net/http"
 )
 
 //  A wiki consists of a series of interconnected pages, each of which has a
@@ -47,9 +49,22 @@ func loadPage(title string) (*Page, error) {
     return &Page{Title: title, Body: body}, nil
 }
 
+// The function viewHandler allow users to view a wiki page; it will handle URLs
+// prefixed with "/view/".
+func viewHandler(w http.ResponseWriter, r *http.Request) {
+	// Extract the page title from r.URL.Path, the path component of the request
+	// URL. The Path is re-sliced with [len("/view/"):] to drop the leading
+	// "/view/" component of the request path; this is because the path will
+	// invariably begin with "/view/", which is not part of the page's title.
+	title := r.URL.Path[len("/view/"):]
+	// Load the page data.
+	p, _ := loadPage(title)
+	// Format the page with a string of simple HTML, and writes it the
+	// ResponseWriter.
+    fmt.Fprintf(w, "<h1>%s</h1><div>%s</div>", p.Title, p.Body)
+}
+
 func main() {
-    p1 := &Page{Title: "TestPage", Body: []byte("This is a sample Page.")}
-    p1.save()
-    p2, _ := loadPage("TestPage")
-    fmt.Println(string(p2.Body))
+    http.HandleFunc("/view/", viewHandler)
+    log.Fatal(http.ListenAndServe(":8080", nil))
 }
