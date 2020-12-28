@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"html/template"
 	"io/ioutil"
 	"log"
@@ -74,27 +73,9 @@ func renderTemplate(w http.ResponseWriter, tmpl string, p *Page) {
 // second parameter.
 var validPath = regexp.MustCompile("^/(edit|save|view)/([a-zA-Z0-9]+)$")
 
-// The function getTitle uses the validPath expression to validate path and
-// extract the page title.
-// If the title is valid, it will be returned along with a nil error value. If
-// the title is invalid, the function will write a "404 Not Found" error to the
-// HTTP connection, and return an error to the handler.
-func getTitle(w http.ResponseWriter, r *http.Request) (string, error) {
-    m := validPath.FindStringSubmatch(r.URL.Path)
-    if m == nil {
-        http.NotFound(w, r)
-        return "", errors.New("invalid Page Title")
-    }
-    return m[2], nil // The title is the second subexpression.
-}
-
 // The function viewHandler allow users to view a wiki page; it will handle URLs
 // prefixed with "/view/".
-func viewHandler(w http.ResponseWriter, r *http.Request) {
-	title, err := getTitle(w, r)
-    if err != nil {
-        return
-    }
+func viewHandler(w http.ResponseWriter, r *http.Request, title string) {
 	// Load the page data.
 	p, err := loadPage(title)
 	if err != nil {
@@ -110,11 +91,7 @@ func viewHandler(w http.ResponseWriter, r *http.Request) {
 
 // The function editHandler loads the page (or, if it doesn't exist, create an
 // empty Page struct), and displays an HTML form.
-func editHandler(w http.ResponseWriter, r *http.Request) {
-	title, err := getTitle(w, r)
-    if err != nil {
-        return
-    }
+func editHandler(w http.ResponseWriter, r *http.Request, title string) {
     p, err := loadPage(title)
     if err != nil {
         p = &Page{Title: title}
@@ -124,19 +101,13 @@ func editHandler(w http.ResponseWriter, r *http.Request) {
 
 // The function saveHandler handles the submission of forms located on the edit
 // pages.
-func saveHandler(w http.ResponseWriter, r *http.Request) {
-	// The page title (provided in the URL) and the form's only field, Body, are
-	// stored in a new Page.
-	title, err := getTitle(w, r)
-    if err != nil {
-        return
-    }
+func saveHandler(w http.ResponseWriter, r *http.Request, title string) {
 	body := r.FormValue("body")
 	// The value returned by FormValue is of type string, so we must convert
 	// that value to []byte before it will fit into the Page struct.
 	p := &Page{Title: title, Body: []byte(body)}
 	// The save() method writes the data to a file
-	err = p.save()
+	err := p.save()
 	if err != nil {
         http.Error(w, err.Error(), http.StatusInternalServerError)
         return
@@ -145,9 +116,30 @@ func saveHandler(w http.ResponseWriter, r *http.Request) {
     http.Redirect(w, r, "/view/"+title, http.StatusFound)
 }
 
+// The closure returned by makeHandler is a function that takes a ResponseWriter
+// and http.Request (in other words, an HandlerFunc).
+func makeHandler(fn func (http.ResponseWriter,
+	*http.Request, string)) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// Extract the page title from the Request, and call the provided
+		// handler 'fn'
+		m := validPath.FindStringSubmatch(r.URL.Path)
+        if m == nil {
+			// If the title is invalid, an error will be written to the
+			// ResponseWriter using the NotFound function.
+            http.NotFound(w, r)
+            return
+		}
+		// If the title is valid, the enclosed handler function fn will be
+		// called with the ResponseWriter, Request, and title as arguments.
+        fn(w, r, m[2])
+	}
+}
+
+
 func main() {
-	http.HandleFunc("/view/", viewHandler)
-	http.HandleFunc("/edit/", editHandler)
-	http.HandleFunc("/save/", saveHandler)
+	http.HandleFunc("/view/", makeHandler(viewHandler))
+	http.HandleFunc("/edit/", makeHandler(editHandler))
+	http.HandleFunc("/save/", makeHandler(saveHandler))
     log.Fatal(http.ListenAndServe(":8080", nil))
 }
