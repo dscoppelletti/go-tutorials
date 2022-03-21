@@ -8,6 +8,9 @@ gowiki/wiki
 # Text files
 gowiki/*.txt
 
+# Test data
+testdata/
+
 # Visual Code
 *.code-workspace
 
